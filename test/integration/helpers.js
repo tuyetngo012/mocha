@@ -31,7 +31,7 @@ module.exports = {
     path = resolveFixturePath(fixturePath);
     args = args || [];
 
-    invokeMocha(args.concat(['-C', path]), function(err, res) {
+    return invokeMocha(args.concat(['-C', path]), function(err, res) {
       if (err) {
         return done(err);
       }
@@ -139,10 +139,11 @@ function _spawnMochaWithListeners(args, fn, cwd) {
   mocha.stderr.on('data', listener);
   mocha.on('error', fn);
 
-  mocha.on('close', function(code) {
+  mocha.on('close', function(code, signal) {
     fn(null, {
       output: output.split('\n').join('\n'),
-      code: code
+      code: code,
+      signal: signal
     });
   });
 

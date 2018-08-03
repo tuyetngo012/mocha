@@ -1,11 +1,13 @@
 'use strict';
 
+var assert = require('assert');
 var path = require('path');
 var helpers = require('./helpers');
 var run = helpers.runMochaJSON;
 var runRaw = helpers.runMochaJSONRaw;
 var directInvoke = helpers.invokeMocha;
 var resolvePath = helpers.resolveFixturePath;
+var bang = require('../../lib/reporters/base').symbols.bang;
 var args = [];
 
 describe('options', function() {
@@ -604,4 +606,154 @@ describe('options', function() {
       });
     });
   }
+
+  describe('--cleanup-after', function() {
+    this.timeout(0);
+    this.slow(1000);
+
+    function runAndKill(signal, fixture, args, fn) {
+      var mocha = helpers.runMocha(
+        fixture,
+        ['--reporter', 'dot'].concat(args),
+        function(err, res) {
+          if (err) {
+            fn(err);
+          } else {
+            var lines = res.output
+              .split(helpers.splitRegExp)
+              .map(function(line) {
+                return line.replace(bang, '').trim();
+              })
+              .filter(onlyConsoleOutput())
+              .filter(function(line) {
+                return line.indexOf('Terminating mocha') < 0;
+              });
+
+            fn(null, res.code, res.signal, lines);
+          }
+        }
+      );
+      setTimeout(function() {
+        mocha.kill(signal);
+      }, 500);
+    }
+
+    it('should run after hooks after killing when passing --cleanup-after=1000', function(done) {
+      runAndKill(
+        'SIGINT',
+        'hang.fixture.js',
+        ['--cleanup-after=1000'],
+        function(err, code, signal, lines) {
+          if (err) {
+            done(err);
+          } else {
+            assert.deepEqual(lines, [
+              'it()',
+              'async afterEach()',
+              'afterEach()',
+              'async after()',
+              'after()'
+            ]);
+            assert.equal(code, null);
+            assert.equal(signal, 'SIGINT');
+            done();
+          }
+        }
+      );
+    });
+
+    it('should run after hooks after killing with SIGINT when passing --cleanup-after 1000', function(done) {
+      runAndKill(
+        'SIGINT',
+        'hang.fixture.js',
+        ['--cleanup-after', '1000'],
+        function(err, code, signal, lines) {
+          if (err) {
+            done(err);
+          } else {
+            assert.deepEqual(lines, [
+              'it()',
+              'async afterEach()',
+              'afterEach()',
+              'async after()',
+              'after()'
+            ]);
+            assert.equal(code, null);
+            assert.equal(signal, 'SIGINT');
+            done();
+          }
+        }
+      );
+    });
+
+    it('should run after hooks after killing with SIGTERM when passing --cleanup-after 1000', function(done) {
+      runAndKill(
+        'SIGTERM',
+        'hang.fixture.js',
+        ['--cleanup-after', '1000'],
+        function(err, code, signal, lines) {
+          if (err) {
+            done(err);
+          } else {
+            assert.deepEqual(lines, [
+              'it()',
+              'async afterEach()',
+              'afterEach()',
+              'async after()',
+              'after()'
+            ]);
+            assert.equal(code, null);
+            assert.equal(signal, 'SIGTERM');
+            done();
+          }
+        }
+      );
+    });
+
+    it('should forcefully kill after timeout when passing --cleanup-after 1000', function(done) {
+      runAndKill(
+        'SIGTERM',
+        'loop.fixture.js',
+        ['--cleanup-after', '1000'],
+        function(err, code, signal, lines) {
+          if (err) {
+            done(err);
+          } else {
+            assert.deepEqual(lines, ['it()']);
+            assert.equal(code, null);
+            assert.equal(signal, 'SIGTERM');
+            done();
+          }
+        }
+      );
+    });
+
+    it('should by default not run after hooks after killing', function(done) {
+      runAndKill('SIGINT', 'hang.fixture.js', [], function(
+        err,
+        code,
+        signal,
+        lines
+      ) {
+        if (err) {
+          done(err);
+        } else {
+          assert.deepEqual(lines, ['it()']);
+          assert.equal(code, null);
+          assert.equal(signal, 'SIGINT');
+          done();
+        }
+      });
+    });
+  });
 });
+
+function onlyConsoleOutput() {
+  var foundSummary = false;
+  return function(line) {
+    if (!foundSummary) {
+      foundSummary = !!/\(\d+ms\)/.exec(line);
+    }
+    return !foundSummary && line.length > 0;
+  };
+}

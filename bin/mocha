@@ -11,13 +11,15 @@ const spawn = require('child_process').spawn;
 const path = require('path');
 const getOptions = require('./options');
 const args = [path.join(__dirname, '_mocha')];
+var cleanupAfter = 0;
 
 // Load mocha.opts into process.argv
 // Must be loaded here to handle node-specific options
 getOptions();
 
-process.argv.slice(2).forEach(arg => {
-  const flag = arg.split('=')[0];
+for (var i = 2; i < process.argv.length; i++) {
+  const arg = process.argv[i];
+  const [flag, value] = arg.split('=');
 
   switch (flag) {
     case '-d':
@@ -52,6 +54,9 @@ process.argv.slice(2).forEach(arg => {
     case '--napi-modules':
       args.unshift(arg);
       break;
+    case '--cleanup-after':
+      cleanupAfter = parseInt(value || process.argv[++i]);
+      break;
     default:
       if (arg.indexOf('--harmony') === 0) {
         args.unshift(arg);
@@ -68,14 +73,21 @@ process.argv.slice(2).forEach(arg => {
       }
       break;
   }
-});
+}
 
+var killTimer;
 const proc = spawn(process.execPath, args, {
   stdio: 'inherit'
 });
 proc.on('exit', (code, signal) => {
+  if (killTimer) {
+    clearTimeout(killTimer);
+    killTimer = undefined;
+  }
+
   process.on('exit', () => {
     if (signal) {
+      process.removeAllListeners(signal);
       process.kill(process.pid, signal);
     } else {
       process.exit(code);
@@ -84,7 +96,24 @@ proc.on('exit', (code, signal) => {
 });
 
 // terminate children.
-process.on('SIGINT', () => {
-  proc.kill('SIGINT'); // calls runner.abort()
-  proc.kill('SIGTERM'); // if that didn't work, we're probably in an infinite loop, so make it die.
+['SIGINT', 'SIGTERM'].forEach(signal => {
+  process.on(signal, () => {
+    proc.kill(signal); // calls runner.abort()
+
+    proc.on('exit', () => {
+      process.removeAllListeners(signal);
+      process.kill(process.pid, signal);
+    });
+
+    if (cleanupAfter) {
+      console.error('\nTerminating mocha...');
+
+      killTimer = setTimeout(function() {
+        // if child process doesn't terminate, we're probably in an infinite loop, so make it die.
+        proc.kill('SIGKILL');
+      }, cleanupAfter);
+    } else {
+      proc.kill('SIGKILL');
+    }
+  });
 });

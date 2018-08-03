@@ -253,7 +253,11 @@ program
     collect,
     []
   )
-  .option('--exclude <file>', 'a file or glob pattern to ignore', collect, []);
+  .option('--exclude <file>', 'a file or glob pattern to ignore', collect, [])
+  .option(
+    '--cleanup-after <timeout>',
+    'Always run after hooks even if the process is killed'
+  );
 
 program._name = 'mocha';
 
@@ -640,11 +644,13 @@ if (program.watch) {
   runner = mocha.run(program.exit ? exit : exitLater);
 }
 
-process.on('SIGINT', () => {
-  runner.abort();
+['SIGINT', 'SIGTERM'].forEach(signal => {
+  process.on(signal, () => {
+    process.on('exit', () => {
+      process.removeAllListeners(signal);
+      process.kill(process.pid, signal);
+    });
 
-  // This is a hack:
-  // Instead of `process.exit(130)`, set runner.failures to 130 (exit code for SIGINT)
-  // The amount of failures will be emitted as error code later
-  runner.failures = 130;
+    runner.abort();
+  });
 });
