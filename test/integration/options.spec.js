@@ -69,19 +69,6 @@ describe('options', function() {
         done();
       });
     });
-
-    it('should stop all hooks after the first error', function(done) {
-      run('options/bail-with-after.fixture.js', args, function(err, res) {
-        if (err) {
-          done(err);
-          return;
-        }
-        expect(res, 'to have failed')
-          .and('to have failed test count', 1)
-          .and('to have run test', 'should only display this error');
-        done();
-      });
-    });
   });
 
   describe('--sort', function() {

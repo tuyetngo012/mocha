@@ -3,6 +3,10 @@
 describe('outer', function () {
   describe('inner', function () {
     afterEach(function () {
+      throw new Error('hook error');
+    });
+  
+    afterEach(function () {
       console.log('inner afterEach hook 1 should be displayed');
     });
   
@@ -17,10 +21,8 @@ describe('outer', function () {
     after(function () {
       console.log('inner after hook 2 should be displayed');
     });
-  
-    it('this test should fail', function () {
-      throw new Error('test error should be displayed');
-    });
+
+    it('this test should pass', function () { });
   });
 
   afterEach(function () {

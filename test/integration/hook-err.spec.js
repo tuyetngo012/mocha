@@ -184,9 +184,50 @@ describe('hook error handling', function() {
     });
   });
 
-  function run(fnPath, outputFilter) {
+  describe('with bail option', function() {
+    describe('should run all after hooks after a test fails', function(done) {
+      before(run('options/bail-with-after.fixture.js', undefined, ['--bail']));
+      it('should verify results', function(done) {
+        assert.deepEqual(lines, [
+          bang + 'inner afterEach hook 1 should be displayed',
+          'inner afterEach hook 2 should be displayed',
+          'outer afterEach hook 1 should be displayed',
+          'outer afterEach hook 2 should be displayed',
+          'inner after hook 1 should be displayed',
+          'inner after hook 2 should be displayed',
+          'outer after hook 1 should be displayed',
+          'outer after hook 2 should be displayed'
+        ]);
+        done();
+      });
+    });
+
+    describe('should run all hooks after an after hook fails', function(done) {
+      before(
+        run('options/bail-with-after-error.fixture.js', undefined, ['--bail'])
+      );
+      it('should verify results', function(done) {
+        assert.deepEqual(lines, [
+          bang + 'inner afterEach hook 1 should be displayed',
+          'inner afterEach hook 2 should be displayed',
+          'outer afterEach hook 1 should be displayed',
+          'outer afterEach hook 2 should be displayed',
+          'inner after hook 1 should be displayed',
+          'inner after hook 2 should be displayed',
+          'outer after hook 1 should be displayed',
+          'outer after hook 2 should be displayed'
+        ]);
+        done();
+      });
+    });
+  });
+
+  function run(fnPath, outputFilter, args) {
     return function(done) {
-      runMocha(fnPath, ['--reporter', 'dot'], function(err, res) {
+      runMocha(fnPath, ['--reporter', 'dot'].concat(args || []), function(
+        err,
+        res
+      ) {
         assert.ifError(err);
 
         lines = res.output
