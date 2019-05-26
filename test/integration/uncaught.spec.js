@@ -32,7 +32,7 @@ describe('uncaught exceptions', function() {
       }
       assert.equal(res.stats.pending, 0);
       assert.equal(res.stats.passes, 0);
-      assert.equal(res.stats.failures, 2);
+      assert.equal(res.stats.failures, 3);
 
       assert.equal(
         res.failures[0].title,
@@ -42,7 +42,11 @@ describe('uncaught exceptions', function() {
         res.failures[1].title,
         'fails exactly once when a global error is thrown second'
       );
-      assert.equal(res.code, 2);
+      assert.equal(
+        res.failures[2].title,
+        'fails exactly once when a promise rejection is not handled'
+      );
+      assert.equal(res.code, 3);
       done();
     });
   });

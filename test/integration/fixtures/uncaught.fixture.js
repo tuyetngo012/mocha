@@ -20,3 +20,9 @@ it('fails exactly once when a global error is thrown second', function (done) {
     throw new Error('global error');
   }, 0);
 });
+
+it('fails exactly once when a promise rejection is not handled', function (done) {
+  setTimeout(function () {
+    Promise.reject(new Error('global error'));
+  }, 0);
+});
