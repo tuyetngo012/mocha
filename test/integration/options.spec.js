@@ -746,6 +746,39 @@ describe('options', function() {
       });
     });
   });
+
+  describe('--repeat', function() {
+    function run(args, fn) {
+      helpers.runMocha(
+        'passing.fixture.js',
+        ['--reporter', 'json'].concat(args),
+        function(err, res) {
+          if (err) {
+            fn(err);
+          } else {
+            fn(null, JSON.parse(res.output));
+          }
+        }
+      );
+    }
+
+    it('should repeat the test suite when passing --repeat=3', function(done) {
+      run(['--repeat=3'], function(err, res) {
+        if (err) {
+          done(err);
+        } else {
+          assert.equal(res.length, 3);
+          assert.equal(res[0].tests.length, 2);
+          assert.equal(res[0].passes.length, 2);
+          assert.equal(res[1].tests.length, 2);
+          assert.equal(res[1].passes.length, 2);
+          assert.equal(res[2].tests.length, 2);
+          assert.equal(res[2].passes.length, 2);
+          done();
+        }
+      });
+    });
+  });
 });
 
 function onlyConsoleOutput() {

@@ -257,7 +257,8 @@ program
   .option(
     '--cleanup-after <timeout>',
     'Always run after hooks even if the process is killed'
-  );
+  )
+  .option('--repeat <n>', 'Repeat all tests n times');
 
 program._name = 'mocha';
 
@@ -640,8 +641,52 @@ if (program.watch) {
 } else {
   // load
 
-  mocha.files = files;
-  runner = mocha.run(program.exit ? exit : exitLater);
+  let total = program.repeat || 1;
+  let current = 0;
+  let failureCount = 0;
+
+  purge = () => {
+    files.forEach(file => {
+      delete require.cache[file];
+    });
+  };
+
+  rerun = () => {
+    purge();
+    if (!program.grep) {
+      mocha.grep(null);
+    }
+    mocha.suite = mocha.suite.clone();
+    mocha.suite.ctx = new Mocha.Context();
+    mocha.ui(program.ui);
+    loadAndRun();
+  };
+
+  loadAndRun = () => {
+    mocha.files = files;
+
+    if (program.repeat) {
+      mocha.repeat = {
+        total,
+        current
+      };
+    }
+
+    runner = mocha.run(failures => {
+      runner = null;
+      failureCount += failures;
+
+      if (++current < total && !(program.bail && failureCount)) {
+        rerun();
+      } else if (program.exit) {
+        exit(failureCount);
+      } else {
+        exitLater(failureCount);
+      }
+    });
+  };
+
+  loadAndRun();
 }
 
 ['SIGINT', 'SIGTERM'].forEach(signal => {
