@@ -7,9 +7,12 @@
  * Module dependencies.
  */
 
+const wtfnode = require('wtfnode');
+
 const program = require('commander');
 const path = require('path');
 const fs = require('fs');
+const ms = require('ms');
 const minimatch = require('minimatch');
 const resolve = path.resolve;
 const exists = fs.existsSync;
@@ -31,6 +34,18 @@ const setInterval = global.setInterval;
 const clearTimeout = global.clearTimeout;
 const clearInterval = global.clearInterval;
 
+function calcLeakTimeout() {
+  if (program.leakTimeout) {
+    if (typeof program.leakTimeout === 'string') {
+      return ms(program.leakTimeout);
+    } else {
+      return program.leakTimeout;
+    }
+  } else {
+    return 60000;
+  }
+}
+
 /**
  * Exits Mocha when tests + code under test has finished execution (default)
  * @param {number} code - Exit code; typically # of failures
@@ -39,6 +54,30 @@ const exitLater = code => {
   process.on('exit', () => {
     process.exit(Math.min(code, 255));
   });
+
+  let timeout = Date.now() + calcLeakTimeout();
+  let timer = setInterval(() => {
+    if (Date.now() > timeout) {
+      clearInterval(timer);
+
+      console.error(
+        'Process did not terminate, dumping remaining handles and exiting'
+      );
+      wtfnode.dump();
+
+      process.removeAllListeners('exit');
+      process.exit(-1);
+    } else {
+      let activeHandles = process
+        ._getActiveHandles()
+        .filter(h => typeof h.fd !== 'number' || h.fd > 2); // Filter out stdio handles
+
+      // Allow this timer to be running
+      if (activeHandles.length <= 1) {
+        clearInterval(timer);
+      }
+    }
+  }, 10);
 };
 
 /**
@@ -258,7 +297,11 @@ program
     '--cleanup-after <timeout>',
     'Always run after hooks even if the process is killed'
   )
-  .option('--repeat <n>', 'Repeat all tests n times');
+  .option('--repeat <n>', 'Repeat all tests n times')
+  .option(
+    '--leak-timeout <ms>',
+    'Kill process forcefully if not terminated after the last test has completed'
+  );
 
 program._name = 'mocha';
 

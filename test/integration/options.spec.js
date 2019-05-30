@@ -779,6 +779,60 @@ describe('options', function() {
       });
     });
   });
+
+  describe('--leak-timeout', function() {
+    function run(fixture, args, fn) {
+      helpers.runMocha(fixture, ['--reporter', 'dot'].concat(args), function(
+        err,
+        res
+      ) {
+        if (err) {
+          fn(err);
+        } else {
+          fn(null, res.code, res.output);
+        }
+      });
+    }
+
+    it('should give the program time to complete', function(done) {
+      run(
+        'hang-after-completion.fixture.js',
+        ['--leak-timeout', '500'],
+        function(err, code, output) {
+          if (err) {
+            done(err);
+          } else {
+            assert.equal(code, 0);
+            assert(/it\(\)\n/.test(output));
+            assert(/timer expired\n/.test(output));
+            assert(!/Process did not terminate\n/.test(output));
+            done();
+          }
+        }
+      );
+    });
+
+    it('should forcefully kill the program', function(done) {
+      run(
+        'hang-after-completion.fixture.js',
+        ['--leak-timeout', '100'],
+        function(err, code, output) {
+          if (err) {
+            done(err);
+          } else {
+            assert.equal(code, 255);
+            assert(/it\(\)\n/.test(output));
+            assert(!/timer expired\n/.test(output));
+            assert(/Process did not terminate/.test(output));
+            assert(
+              /fixtures\/hang-after-completion\.fixture\.js:8\n/.test(output)
+            );
+            done();
+          }
+        }
+      );
+    });
+  });
 });
 
 function onlyConsoleOutput() {
