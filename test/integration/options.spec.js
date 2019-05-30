@@ -749,17 +749,7 @@ describe('options', function() {
 
   describe('--repeat', function() {
     function run(args, fn) {
-      helpers.runMocha(
-        'passing.fixture.js',
-        ['--reporter', 'json'].concat(args),
-        function(err, res) {
-          if (err) {
-            fn(err);
-          } else {
-            fn(null, JSON.parse(res.output));
-          }
-        }
-      );
+      helpers.runMochaJSON('passing.fixture.js', args, fn);
     }
 
     it('should repeat the test suite when passing --repeat=3', function(done) {
@@ -831,6 +821,81 @@ describe('options', function() {
           }
         }
       );
+    });
+  });
+
+  describe('--bucket', function() {
+    function run(fixture, args, fn) {
+      helpers.runMochaJSON(fixture, args, fn);
+    }
+
+    it('should run only the first bucket', function(done) {
+      run('bucket.fixture.js', ['--bucket', '2:2'], function(err, res) {
+        if (err) {
+          done(err);
+        } else {
+          assert.equal(res.stats.suites, 1);
+          assert.equal(res.stats.tests, 4);
+          assert.equal(res.tests[0].fullTitle, 'suite 1 test 1');
+          assert.equal(res.tests[1].fullTitle, 'suite 1 test 2');
+          assert.equal(res.tests[2].fullTitle, 'suite 1 test 3');
+          assert.equal(res.tests[3].fullTitle, 'suite 1 test 4');
+          done();
+        }
+      });
+    });
+
+    it('should run only the second bucket', function(done) {
+      run('bucket.fixture.js', ['--bucket', '1:2'], function(err, res) {
+        if (err) {
+          done(err);
+        } else {
+          assert.equal(res.stats.suites, 2);
+          assert.equal(res.stats.tests, 4);
+          assert.equal(res.tests[0].fullTitle, 'suite 2 test 1');
+          assert.equal(res.tests[1].fullTitle, 'suite 2 test 2');
+          assert.equal(res.tests[2].fullTitle, 'suite 3 test 1');
+          assert.equal(res.tests[3].fullTitle, 'suite 3 test 2');
+          done();
+        }
+      });
+    });
+
+    it('should split test suites equally regardless of test suite order - 1', function(done) {
+      // The splitting in buckets have to be stable, because the exact same split must be done in all parallel runs,
+      // so that a single test is never run by two different runs
+
+      run('bucket-order-1.fixture.js', ['--bucket', '2:2'], function(err, res) {
+        if (err) {
+          done(err);
+        } else {
+          assert.equal(res.stats.suites, 2);
+          assert.equal(res.stats.tests, 2);
+          assert.equal(res.tests[0].fullTitle, 'suite 1 test 1');
+          assert.equal(res.tests[1].fullTitle, 'suite 3 test 1');
+          done();
+        }
+      });
+    });
+
+    it('should split test suites equally regardless of test suite order - 2', function(done) {
+      // The splitting in buckets have to be stable, because the exact same split must be done in all parallel runs,
+      // so that a single test is never run by two different runs
+
+      run('bucket-order-2.fixture.js', ['--bucket', '2:2'], function(err, res) {
+        // Same test as `should split test suites equally regardless of test suite order - 1`, but the test suites are given in a different order
+        // The buckets should still be split in the exact same way
+
+        if (err) {
+          done(err);
+        } else {
+          assert.equal(res.stats.suites, 2);
+          assert.equal(res.stats.tests, 2);
+          assert.equal(res.tests[0].fullTitle, 'suite 1 test 1');
+          assert.equal(res.tests[1].fullTitle, 'suite 3 test 1');
+          done();
+        }
+      });
     });
   });
 });

@@ -301,6 +301,10 @@ program
   .option(
     '--leak-timeout <ms>',
     'Kill process forcefully if not terminated after the last test has completed'
+  )
+  .option(
+    '--bucket <m>:<n>',
+    'Split the tests suites in <n> buckets, and only run the tests in bucket <m>. Useful for splitting the tests in parallell runs.'
   );
 
 program._name = 'mocha';
@@ -480,6 +484,13 @@ if (program.fgrep) {
 
 if (program.invert) {
   mocha.invert();
+}
+
+// --bucket
+
+if (program.bucket) {
+  var parts = program.bucket.split(':');
+  mocha.bucket(parseInt(parts[1]), parseInt(parts[0]));
 }
 
 // --check-leaks
