@@ -11,6 +11,7 @@ Fork of [mocha](https://www.npmjs.com/package/mocha), which will be kept until t
 - Support for `wtfnode`, to log leaked resources (see commit [f160a66c](https://github.com/johanblumenberg/mocha/commit/f160a66cfe259923241e255da537b3332f4dc257))
 - Split in buckets, for parallel runs (see commit [ffe8ce7c](https://github.com/johanblumenberg/mocha/commit/ffe8ce7c806b83f77108bd5241bc2d539bd4f6d5))
 - Handle unhandled rejections the same as uncaught exceptions (see commit [a59c3a81](https://github.com/johanblumenberg/mocha/commit/a59c3a817fef020431bd1ed570c4d95eb36f85c5))
+- Support for async event listeners (using @johanblumenberg/EventEmitterAsync)
 
 ## Purpose
 
