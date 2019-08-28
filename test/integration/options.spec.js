@@ -244,6 +244,92 @@ describe('options', function() {
         });
       });
     });
+
+    describe('grep/grepv', function() {
+      it('grep runs only specs that matches the pattern', function(done) {
+        args = ['--grep', 'abc'];
+        run('options/grepv.fixture.js', args, function(err, res) {
+          if (err) {
+            done(err);
+            return;
+          }
+          expect(res, 'to have passed')
+            .and('to have passed test count', 2)
+            .and('to have passed test order', 'abc 1', 'abc 2');
+          done();
+        });
+      });
+
+      it('grepv runs only specs that do not match the pattern', function(done) {
+        args = ['--grepv', 'abc'];
+        run('options/grepv.fixture.js', args, function(err, res) {
+          if (err) {
+            done(err);
+            return;
+          }
+          expect(res, 'to have passed')
+            .and('to have passed test count', 2)
+            .and('to have passed test order', 'abd 1', 'abd 2');
+          done();
+        });
+      });
+
+      it('grep and grepv runs only specs that matches the grep pattern but not the grepv pattern', function(done) {
+        args = ['--grep', 'abc', '--grepv', 'abc 1'];
+        run('options/grepv.fixture.js', args, function(err, res) {
+          if (err) {
+            done(err);
+            return;
+          }
+          expect(res, 'to have passed')
+            .and('to have passed test count', 1)
+            .and('to have passed test order', 'abc 2');
+          done();
+        });
+      });
+
+      it('grep with invert does not run specs that matches the pattern', function(done) {
+        args = ['--grep', 'abc', '--invert'];
+        run('options/grepv.fixture.js', args, function(err, res) {
+          if (err) {
+            done(err);
+            return;
+          }
+          expect(res, 'to have passed')
+            .and('to have passed test count', 2)
+            .and('to have passed test order', 'abd 1', 'abd 2');
+          done();
+        });
+      });
+
+      it('grepv with invert runs only specs that do match the pattern', function(done) {
+        args = ['--grepv', 'abc', '--invert'];
+        run('options/grepv.fixture.js', args, function(err, res) {
+          if (err) {
+            done(err);
+            return;
+          }
+          expect(res, 'to have passed')
+            .and('to have passed test count', 2)
+            .and('to have passed test order', 'abc 1', 'abc 2');
+          done();
+        });
+      });
+
+      it('grep and grepv with invert does not run specs that matches the grep pattern but not the grepv pattern', function(done) {
+        args = ['--grep', 'abc', '--grepv', 'abc 1', '--invert'];
+        run('options/grepv.fixture.js', args, function(err, res) {
+          if (err) {
+            done(err);
+            return;
+          }
+          expect(res, 'to have passed')
+            .and('to have passed test count', 3)
+            .and('to have passed test order', 'abc 1', 'abd 1', 'abd 2');
+          done();
+        });
+      });
+    });
   });
 
   describe('--retries', function() {

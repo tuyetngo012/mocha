@@ -12,6 +12,7 @@ Fork of [mocha](https://www.npmjs.com/package/mocha), which will be kept until t
 - Split in buckets, for parallel runs (see commit [ffe8ce7c](https://github.com/johanblumenberg/mocha/commit/ffe8ce7c806b83f77108bd5241bc2d539bd4f6d5))
 - Handle unhandled rejections the same as uncaught exceptions (see commit [a59c3a81](https://github.com/johanblumenberg/mocha/commit/a59c3a817fef020431bd1ed570c4d95eb36f85c5))
 - Support for async event listeners (using @johanblumenberg/EventEmitterAsync)
+- Support for '--grepv' to exclude tests from running.
 
 ## Purpose
 
@@ -93,4 +94,14 @@ $ mocha spec/**/*.js --bucket 2:3
 
 # On machine 3
 $ mocha spec/**/*.js --bucket 3:3
+```
+
+### `--grepv <pattern>`
+
+Used to exclude tests from running. Can be combined with `--grep` and `--invert`.
+
+For example, this will run all tests containing `abc`, except those containing `abcdef`
+
+```bash
+$ mocha spec/**/*.js --grep abc --grepv abcdef
 ```
