@@ -11,7 +11,7 @@ const wtfnode = require('wtfnode');
 
 const program = require('commander');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs-extra');
 const ms = require('ms');
 const minimatch = require('minimatch');
 const resolve = path.resolve;
@@ -200,6 +200,7 @@ program
   .option('-d, --debug', "enable node's debugger, synonym for node --debug")
   .option('-g, --grep <pattern>', 'only run tests matching <pattern>')
   .option('-E, --grepv <pattern>', 'exclude tests matching <pattern>')
+  .option('--exclude-from <file>', 'exclude tests from <file>')
   .option('-f, --fgrep <string>', 'only run tests containing <string>')
   .option('-gc, --expose-gc', 'expose gc extension')
   .option('-i, --invert', 'inverts --grep and --fgrep matches')
@@ -479,6 +480,12 @@ if (program.grep) {
 
 if (program.grepv) {
   mocha.grepv(program.grepv);
+}
+
+// --exclude-from
+
+if (program.excludeFrom) {
+  mocha.excludeFrom(fs.readJSONSync(program.excludeFrom).tests);
 }
 
 // --fgrep

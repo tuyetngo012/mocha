@@ -32,7 +32,7 @@ describe('Runner', function() {
       suite.addTest(new Test('im another test about lions', noop));
       suite.addTest(new Test('im a test about bears', noop));
       var newRunner = new Runner(suite);
-      newRunner.grep(/lions/, undefined, true);
+      newRunner.grep(/lions/, undefined, undefined, true);
       expect(newRunner.total, 'to be', 1);
     });
   });
@@ -50,7 +50,7 @@ describe('Runner', function() {
       suite.addTest(new Test('im a test about lions', noop));
       suite.addTest(new Test('im another test about lions', noop));
       suite.addTest(new Test('im a test about bears', noop));
-      runner.grep(/lions/, undefined, true);
+      runner.grep(/lions/, undefined, undefined, true);
       expect(runner.grepTotal(suite), 'to be', 1);
     });
   });
