@@ -1,5 +1,5 @@
 {
-    "tests": [
+    "passes": [
         {
             "title": "first test",
             "fullTitle": "Suite 1 inner suite first test"

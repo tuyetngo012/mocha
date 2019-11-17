@@ -485,7 +485,8 @@ if (program.grepv) {
 // --exclude-from
 
 if (program.excludeFrom) {
-  mocha.excludeFrom(fs.readJSONSync(program.excludeFrom).tests);
+  let json = fs.readJSONSync(program.excludeFrom);
+  mocha.excludeFrom(json.passes || json.tests);
 }
 
 // --fgrep

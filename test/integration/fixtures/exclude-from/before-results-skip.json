@@ -1,0 +1,48 @@
+{
+    "tests": [
+        {
+            "title": "first test",
+            "fullTitle": "Suite 1 inner suite first test"
+        },
+        {
+            "title": "second test",
+            "fullTitle": "Suite 1 inner suite second test"
+        },
+        {
+            "title": "third test",
+            "fullTitle": "Suite 2 third test"
+        },
+        {
+            "title": "fourth test",
+            "fullTitle": "Suite 1 inner suite fourth test"
+        },
+        {
+            "title": "fifth test",
+            "fullTitle": "Suite 2 fifth test"
+        }
+    ],
+    "passes": [
+        {
+            "title": "first test",
+            "fullTitle": "Suite 1 inner suite first test"
+        },
+        {
+            "title": "second test",
+            "fullTitle": "Suite 1 inner suite second test"
+        },
+        {
+            "title": "third test",
+            "fullTitle": "Suite 2 third test"
+        }
+    ],
+    "pending": [
+        {
+            "title": "fourth test",
+            "fullTitle": "Suite 1 inner suite fourth test"
+        },
+        {
+            "title": "fifth test",
+            "fullTitle": "Suite 2 fifth test"
+        }
+    ]
+}

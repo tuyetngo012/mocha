@@ -57,4 +57,20 @@ describe('exclude-from', function() {
       done();
     });
   });
+  it('should exclude tests from file', function(done) {
+    var args = [
+      '--exclude-from',
+      path.join(__dirname, 'fixtures/exclude-from/before-results-skip.json')
+    ];
+    run('exclude-from/after.fixture.js', args, function(err, res) {
+      if (err) {
+        done(err);
+        return;
+      }
+      expect(res, 'to have passed')
+        .and('to have passed test count', 2)
+        .and('to have passed test order', 'fourth test', 'fifth test');
+      done();
+    });
+  });
 });
