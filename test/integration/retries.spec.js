@@ -55,7 +55,7 @@ describe('retries', function() {
   });
 
   it('should exit early if test passes', function(done) {
-    helpers.runMochaJSON('retries/early-pass.fixture.js', args, function(
+    helpers.runMochaJSON('retries/early-pass.fixture.js', [], function(
       err,
       res
     ) {
@@ -73,7 +73,7 @@ describe('retries', function() {
   });
 
   it('should let test override', function(done) {
-    helpers.runMochaJSON('retries/nested.fixture.js', args, function(err, res) {
+    helpers.runMochaJSON('retries/nested.fixture.js', [], function(err, res) {
       if (err) {
         done(err);
         return;

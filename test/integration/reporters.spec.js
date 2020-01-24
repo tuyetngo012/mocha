@@ -99,4 +99,54 @@ describe('reporters', function() {
       });
     });
   });
+
+  describe('multiple reporters', function() {
+    it('can load multiple reporters', function(done) {
+      var args = [
+        '--reporter',
+        'test/integration/fixtures/simple-reporter.js',
+        '--reporter-option',
+        'name=r1',
+        '--reporter',
+        'test/integration/fixtures/simple-reporter.js',
+        '--reporter-option',
+        'name=r2'
+      ];
+
+      run('passing.fixture.js', args, function(err, result) {
+        if (err) {
+          done(err);
+          return;
+        }
+
+        expect(result.output, 'to contain', "r1: on('suite') called");
+        expect(result.output, 'to contain', "r2: on('suite') called");
+        done();
+      });
+    });
+
+    it('will read the first reporters options in any order', function(done) {
+      var args = [
+        '--reporter-option',
+        'name=r1',
+        '--reporter',
+        'test/integration/fixtures/simple-reporter.js',
+        '--reporter',
+        'test/integration/fixtures/simple-reporter.js',
+        '--reporter-option',
+        'name=r2'
+      ];
+
+      run('passing.fixture.js', args, function(err, result) {
+        if (err) {
+          done(err);
+          return;
+        }
+
+        expect(result.output, 'to contain', "r1: on('suite') called");
+        expect(result.output, 'to contain', "r2: on('suite') called");
+        done();
+      });
+    });
+  });
 });

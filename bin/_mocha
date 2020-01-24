@@ -188,12 +188,7 @@ program
   .option('-C, --no-colors', 'force disabling of colors')
   .option('-G, --growl', 'enable growl notification support')
   .option('-O, --reporter-options <k=v,k2=v2,...>', 'reporter-specific options')
-  .option(
-    '-o, --reporter-option <k=v>',
-    'reporter-specific option',
-    collect,
-    []
-  )
+  .option('-o, --reporter-option <k=v>', 'reporter-specific option')
   .option('-R, --reporter <name>', 'specify the reporter to use', 'spec')
   .option('-S, --sort', 'sort test files')
   .option('-b, --bail', 'bail after first test failure')
@@ -367,6 +362,53 @@ program.on('option:interfaces', () => {
   process.exit();
 });
 
+// reporter options
+
+let reporters = [];
+let reporterOptions = {};
+
+function addReporterOptionValue(object, name, value) {
+  if (name.length === 1) {
+    object[name[0]] = value;
+  } else {
+    if (!object[name[0]]) {
+      object[name[0]] = {};
+    }
+    addReporterOptionValue(object[name[0]], name.slice(1), value);
+  }
+}
+
+function addReporterOption(opts, opt) {
+  const L = opt.split('=');
+  if (L.length > 2 || L.length === 0) {
+    throw new Error(`invalid reporter option '${opt}'`);
+  } else if (L.length === 2) {
+    addReporterOptionValue(opts, L[0].split('.'), L[1]);
+  } else {
+    addReporterOptionValue(opts, L[0].split('.'), true);
+  }
+}
+
+program.on('option:reporter', function() {
+  if (reporters.length > 0) {
+    reporterOptions = {};
+  }
+  reporters.push({
+    reporter: this.reporter,
+    reporterOptions: reporterOptions
+  });
+});
+
+program.on('option:reporter-option', function() {
+  addReporterOption(reporterOptions, this.reporterOption);
+});
+
+program.on('option:reporter-options', function() {
+  this.reporterOptions.split(',').forEach(reporterOption => {
+    addReporterOption(reporterOptions, reporterOption);
+  });
+});
+
 // -r, --require
 
 module.paths.push(cwd, join(cwd, 'node_modules'));
@@ -392,37 +434,15 @@ program.parse(process.argv);
 
 Error.stackTraceLimit = Infinity; // TODO: config
 
-// reporter options
-
-const reporterOptions = {};
-
-function addReporterOption(object, name, value) {
-  if (name.length === 1) {
-    object[name[0]] = value;
-  } else {
-    if (!object[name[0]]) {
-      object[name[0]] = {};
-    }
-    addReporterOption(object[name[0]], name.slice(1), value);
-  }
-}
-
-program.reporterOption
-  .concat(program.reporterOptions ? program.reporterOptions.split(',') : [])
-  .forEach(opt => {
-    const L = opt.split('=');
-    if (L.length > 2 || L.length === 0) {
-      throw new Error(`invalid reporter option '${opt}'`);
-    } else if (L.length === 2) {
-      addReporterOption(reporterOptions, L[0].split('.'), L[1]);
-    } else {
-      addReporterOption(reporterOptions, L[0].split('.'), true);
-    }
-  });
-
 // reporter
 
-mocha.reporter(program.reporter, reporterOptions);
+if (reporters.length > 0) {
+  reporters.forEach(reporter => {
+    mocha.reporter(reporter.reporter, reporter.reporterOptions);
+  });
+} else {
+  mocha.reporter(undefined, reporterOptions);
+}
 
 // --no-colors
 

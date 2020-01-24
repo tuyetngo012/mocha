@@ -16,7 +16,7 @@ describe('json reporter', function() {
     suite = new Suite('JSON suite', 'root');
     runner = new Runner(suite);
     /* eslint no-unused-vars: off */
-    var mochaReporter = new mocha._reporter(runner);
+    var mochaReporter = mocha._reporters[0](runner);
   });
 
   it('should have 1 test failure', function(done) {
