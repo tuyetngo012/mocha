@@ -14,6 +14,7 @@ Fork of [mocha](https://www.npmjs.com/package/mocha), which will be kept until t
 - Support for async event listeners (using @johanblumenberg/EventEmitterAsync)
 - Support for '--grepv' to exclude tests from running.
 - Support excluding tests from file using `--exclude-from`
+- Support for multiple reporters (see commit [e5f8a47d](https://github.com/johanblumenberg/mocha/commit/e5f8a47d14c23e033122d92377da14c1b2752921))
 
 ## Purpose
 
