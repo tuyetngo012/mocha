@@ -61,6 +61,35 @@ describe('reporters', function() {
         done(err);
       });
     });
+
+    it('print stdout to xunit file', function(done) {
+      var randomStr = crypto.randomBytes(8).toString('hex');
+      var tmpDir = os.tmpdir().replace(new RegExp(path.sep + '$'), '');
+      var tmpFile = tmpDir + path.sep + 'stdout-' + randomStr + '.xml';
+
+      var args = [
+        '--reporter=xunit',
+        '--reporter-options',
+        'output=' + tmpFile
+      ];
+      var expectedOutput = [
+        '<system-out>hello world</system-out>',
+        '</testsuite>'
+      ];
+
+      run('failing-with-log.fixture.js', args, function(err, result) {
+        if (err) return done(err);
+
+        var xml = fs.readFileSync(tmpFile, 'utf8');
+        fs.unlinkSync(tmpFile);
+
+        expectedOutput.forEach(function(line) {
+          expect(xml, 'to contain', line);
+        });
+
+        done(err);
+      });
+    });
   });
 
   describe('loader', function() {

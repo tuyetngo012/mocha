@@ -24,6 +24,7 @@ describe('XUnit reporter', function() {
   beforeEach(function() {
     stdout = [];
     runner = {on: function() {}, once: function() {}};
+    expectedWrite = '';
   });
 
   describe('if reporter options output is given', function() {
@@ -221,7 +222,7 @@ describe('XUnit reporter', function() {
         xunit.test.call(
           {
             write: function(string) {
-              expectedWrite = string;
+              expectedWrite += string;
             }
           },
           expectedTest
@@ -236,7 +237,10 @@ describe('XUnit reporter', function() {
           expectedMessage +
           '\n' +
           expectedStack +
-          '</failure></testcase>';
+          '</failure>' +
+          '<system-out></system-out>' +
+          '<system-err></system-err>' +
+          '</testcase>';
 
         expect(expectedWrite, 'to be', expectedTag);
       });
