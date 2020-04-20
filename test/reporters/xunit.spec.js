@@ -202,6 +202,38 @@ describe('XUnit reporter', function() {
   });
 
   describe('test', function() {
+    it('should escape period in suite name', function() {
+      var xunit = new XUnit({on: function() {}, once: function() {}});
+
+      var expectedTest = {
+        state: 'passed',
+        isPending: function() {
+          return false;
+        },
+        title: expectedTitle,
+        parent: {
+          fullTitle: function() {
+            return 'test . with period';
+          }
+        },
+        duration: 1000
+      };
+      xunit.test.call(
+        {
+          write: function(string) {
+            expectedWrite += string;
+          }
+        },
+        expectedTest
+      );
+
+      var expectedTag =
+        '<testcase classname="test &#xFF0E; with period" name="' +
+        expectedTitle +
+        '" time="1"/>';
+
+      expect(expectedWrite, 'to contain', expectedTag);
+    });
     describe('on test failure', function() {
       it('should write expected tag with error details', function() {
         var xunit = new XUnit({on: function() {}, once: function() {}});
