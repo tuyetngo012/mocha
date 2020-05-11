@@ -223,7 +223,7 @@ module.exports = {
       browser: {
         default: {
           script:
-            'nps clean build test.browser.unit test.browser.bdd test.browser.tdd test.browser.qunit test.browser.esm',
+            'nps clean build test.browser.unit test.browser.bdd test.browser.tdd test.browser.qunit',
           description: 'Run browser tests'
         },
         unit: {
