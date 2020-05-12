@@ -123,6 +123,35 @@ describe('reporters', function() {
         done(err);
       });
     });
+
+    it('print beforeEach stdout to xunit file on test failure', function(done) {
+      var randomStr = crypto.randomBytes(8).toString('hex');
+      var tmpDir = os.tmpdir().replace(new RegExp(path.sep + '$'), '');
+      var tmpFile = tmpDir + path.sep + 'stdout-' + randomStr + '.xml';
+
+      var args = [
+        '--reporter=xunit',
+        '--reporter-options',
+        'output=' + tmpFile
+      ];
+      var expectedOutput = [
+        '<system-out>hello before\nhello test</system-out>',
+        '</testsuite>'
+      ];
+
+      run('failing-with-log-before.fixture.js', args, function(err, result) {
+        if (err) return done(err);
+
+        var xml = fs.readFileSync(tmpFile, 'utf8');
+        fs.unlinkSync(tmpFile);
+
+        expectedOutput.forEach(function(line) {
+          expect(xml, 'to contain', line);
+        });
+
+        done(err);
+      });
+    });
   });
 
   describe('loader', function() {
