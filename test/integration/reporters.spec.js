@@ -62,94 +62,39 @@ describe('reporters', function() {
       });
     });
 
-    it('print stdout to xunit file', function(done) {
-      var randomStr = crypto.randomBytes(8).toString('hex');
-      var tmpDir = os.tmpdir().replace(new RegExp(path.sep + '$'), '');
-      var tmpFile = tmpDir + path.sep + 'stdout-' + randomStr + '.xml';
+    [
+      {where: 'test', expectedOutput: ['#test()#', '#beforeEach()#']},
+      {where: 'before', expectedOutput: ['#before()#']},
+      {where: 'beforeEach', expectedOutput: ['#beforeEach()#']},
+      {where: 'after', expectedOutput: ['#after()#']},
+      {where: 'afterEach', expectedOutput: ['#afterEach()#']}
+    ].forEach(function(p) {
+      it('print stdout to xunit file when ' + p.where + ' is failing', function(
+        done
+      ) {
+        var randomStr = crypto.randomBytes(8).toString('hex');
+        var tmpDir = os.tmpdir().replace(new RegExp(path.sep + '$'), '');
+        var tmpFile = tmpDir + path.sep + 'stdout-' + randomStr + '.xml';
 
-      var args = [
-        '--reporter=xunit',
-        '--reporter-options',
-        'output=' + tmpFile
-      ];
-      var expectedOutput = [
-        '<system-out>hello world</system-out>',
-        '</testsuite>'
-      ];
+        var args = [
+          '--reporter=xunit',
+          '--reporter-options',
+          'output=' + tmpFile,
+          '--where=' + p.where
+        ];
 
-      run('failing-with-log.fixture.js', args, function(err, result) {
-        if (err) return done(err);
+        run('failing-with-log.fixture.js', args, function(err, result) {
+          if (err) return done(err);
 
-        var xml = fs.readFileSync(tmpFile, 'utf8');
-        fs.unlinkSync(tmpFile);
+          var xml = fs.readFileSync(tmpFile, 'utf8');
+          fs.unlinkSync(tmpFile);
 
-        expectedOutput.forEach(function(line) {
-          expect(xml, 'to contain', line);
+          p.expectedOutput.forEach(function(line) {
+            expect(xml, 'to contain', line);
+          });
+
+          done(err);
         });
-
-        done(err);
-      });
-    });
-
-    it('print stdout to xunit file on hook failure', function(done) {
-      var randomStr = crypto.randomBytes(8).toString('hex');
-      var tmpDir = os.tmpdir().replace(new RegExp(path.sep + '$'), '');
-      var tmpFile = tmpDir + path.sep + 'stdout-' + randomStr + '.xml';
-
-      var args = [
-        '--reporter=xunit',
-        '--reporter-options',
-        'output=' + tmpFile
-      ];
-      var expectedOutput = [
-        '<system-out>hello after</system-out>',
-        '</testsuite>'
-      ];
-      var unexpectedOutput = ['<system-out>hello test</system-out>'];
-
-      run('failing-with-log-after.fixture.js', args, function(err, result) {
-        if (err) return done(err);
-
-        var xml = fs.readFileSync(tmpFile, 'utf8');
-        fs.unlinkSync(tmpFile);
-
-        expectedOutput.forEach(function(line) {
-          expect(xml, 'to contain', line);
-        });
-        unexpectedOutput.forEach(function(line) {
-          expect(xml, 'not to contain', line);
-        });
-
-        done(err);
-      });
-    });
-
-    it('print beforeEach stdout to xunit file on test failure', function(done) {
-      var randomStr = crypto.randomBytes(8).toString('hex');
-      var tmpDir = os.tmpdir().replace(new RegExp(path.sep + '$'), '');
-      var tmpFile = tmpDir + path.sep + 'stdout-' + randomStr + '.xml';
-
-      var args = [
-        '--reporter=xunit',
-        '--reporter-options',
-        'output=' + tmpFile
-      ];
-      var expectedOutput = [
-        '<system-out>hello before\nhello test</system-out>',
-        '</testsuite>'
-      ];
-
-      run('failing-with-log-before.fixture.js', args, function(err, result) {
-        if (err) return done(err);
-
-        var xml = fs.readFileSync(tmpFile, 'utf8');
-        fs.unlinkSync(tmpFile);
-
-        expectedOutput.forEach(function(line) {
-          expect(xml, 'to contain', line);
-        });
-
-        done(err);
       });
     });
   });
