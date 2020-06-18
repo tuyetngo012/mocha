@@ -193,7 +193,7 @@ program
   .option('-S, --sort', 'sort test files')
   .option('-b, --bail', 'bail after first test failure')
   .option('-d, --debug', "enable node's debugger, synonym for node --debug")
-  .option('-g, --grep <pattern>', 'only run tests matching <pattern>')
+  .option('-t, --grep <pattern>', 'only run tests matching <pattern>')
   .option('-E, --grepv <pattern>', 'exclude tests matching <pattern>')
   .option('--exclude-from <file>', 'exclude tests from <file>')
   .option('-f, --fgrep <string>', 'only run tests containing <string>')
@@ -201,7 +201,7 @@ program
   .option('-i, --invert', 'inverts --grep and --fgrep matches')
   .option('-r, --require <name>', 'require the given module')
   .option('-s, --slow <ms>', '"slow" test threshold in milliseconds [75]')
-  .option('-t, --timeout <ms>', 'set test-case timeout in milliseconds [2000]')
+  .option('--timeout <ms>', 'set test-case timeout in milliseconds [2000]')
   .option(
     '-u, --ui <name>',
     `specify user-interface (${interfaceNames.join('|')})`,
@@ -289,7 +289,18 @@ program
     collect,
     []
   )
-  .option('--exclude <file>', 'a file or glob pattern to ignore', collect, [])
+  .option(
+    '--include <file>',
+    'a file or glob pattern of test files to include',
+    collect,
+    []
+  )
+  .option(
+    '--exclude <file>',
+    'a file or glob pattern of test files to ignore',
+    collect,
+    []
+  )
   .option(
     '--cleanup-after <timeout>',
     'Always run after hooks even if the process is killed'
@@ -614,12 +625,16 @@ mocha.ui(program.ui);
 
 // args
 
-const args = program.args;
+var args = program.args;
 
 // default files to test/*.{js,coffee}
 
 if (!args.length) {
-  args.push('test');
+  if (program.include.length) {
+    args = program.include;
+  } else {
+    args.push('test');
+  }
 }
 
 args.forEach(arg => {
