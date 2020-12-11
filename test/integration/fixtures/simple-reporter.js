@@ -16,6 +16,14 @@ function simplereporter(runner, options) {
     console.log(prefix + "on('suite') called");
   });
 
+  runner.on('suite end', function(suite) {
+    console.log(prefix + "on('suite end') called");
+  });
+
+  runner.on('test', function(test, err) {
+    console.log(prefix + "on('test') called");
+  });
+
   runner.on('fail', function(test, err) {
     console.log(prefix + "on('fail') called");
   });
@@ -26,6 +34,18 @@ function simplereporter(runner, options) {
 
   runner.on('test end', function(test, err) {
     console.log(prefix + "on('test end') called");
+  });
+
+  runner.on('hook', function(hook, err) {
+    console.log(prefix + "on('" + hook.title + "') called");
+  });
+
+  runner.on('hook end', function(hook, err) {
+    console.log(prefix + "on('" + hook.title + " end') called");
+  });
+
+  runner.on('start', function() {
+    console.log(prefix + "on('start') called");
   });
 
   runner.on('end', function() {
