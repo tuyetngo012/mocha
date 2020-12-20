@@ -1,6 +1,6 @@
 {
   "name": "@johanblumenberg/mocha",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "simple, flexible, fun test framework",
   "keywords": [
     "mocha",
