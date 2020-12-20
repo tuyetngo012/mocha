@@ -63,11 +63,20 @@ describe('reporters', function() {
     });
 
     [
-      {where: 'test', expectedOutput: ['#test()#', '#beforeEach()#']},
+      {
+        where: 'beforeEach',
+        expectedOutput: ['#beforeEach()#', '#beforeEach()#']
+      },
+      {
+        where: 'test',
+        expectedOutput: ['#test()#', '#beforeEach()#', '#beforeEach()#']
+      },
+      {
+        where: 'afterEach',
+        expectedOutput: ['#test()#', '#beforeEach()#', '#beforeEach()#']
+      },
       {where: 'before', expectedOutput: ['#before()#']},
-      {where: 'beforeEach', expectedOutput: ['#beforeEach()#']},
-      {where: 'after', expectedOutput: ['#after()#']},
-      {where: 'afterEach', expectedOutput: ['#afterEach()#']}
+      {where: 'after', expectedOutput: ['#after()#']}
     ].forEach(function(p) {
       it('print stdout to xunit file when ' + p.where + ' is failing', function(
         done

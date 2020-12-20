@@ -95,10 +95,35 @@ describe('reporter-events', function() {
         "on('test') called",
         'on(\'"before each" hook\') called',
         "on('fail') called",
-        // There is currently a bug here, hook end is not called for failing hooks
-        // 'on(\'"before each" hook end\') called',
+        'on(\'"before each" hook for "test1" end\') called',
         'on(\'"after each" hook\') called',
         'on(\'"after each" hook end\') called',
+        "on('test end') called",
+        'on(\'"after all" hook\') called',
+        'on(\'"after all" hook end\') called',
+        "on('suite end') called",
+        "on('suite end') called"
+      ]);
+      done();
+    });
+  });
+
+  it('reports events in correct order when after each hook is failing', function(done) {
+    run('afterEach', done, function(code, lines) {
+      expect(code, 'to equal', 1);
+      expect(lines, 'to equal', [
+        "on('start') called",
+        "on('suite') called",
+        "on('suite') called",
+        'on(\'"before all" hook\') called',
+        'on(\'"before all" hook end\') called',
+        "on('test') called",
+        'on(\'"before each" hook\') called',
+        'on(\'"before each" hook end\') called',
+        'on(\'"after each" hook\') called',
+        "on('fail') called",
+        'on(\'"after each" hook for "test1" end\') called',
+        "on('pass') called",
         "on('test end') called",
         'on(\'"after all" hook\') called',
         'on(\'"after all" hook end\') called',
