@@ -180,6 +180,7 @@ program
     ).version
   )
   .usage('[debug] [options] [files]')
+  .allowUnknownOption()
   .option(
     '-A, --async-only',
     'force all tests to take a callback (async) or return a promise'
