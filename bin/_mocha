@@ -422,9 +422,6 @@ program.on('option:reporter-options', function() {
 });
 
 // -r, --require
-
-module.paths.push(cwd, join(cwd, 'node_modules'));
-
 program.on('option:require', mod => {
   const abs = exists(mod) || exists(`${mod}.js`);
   if (abs) {
@@ -616,8 +613,18 @@ program.compilers.forEach(c => {
 
 // requires
 
+function getResolvePaths(dir) {
+  const result = [];
+  while (dir.length > 1) {
+    result.push(path.join(dir, 'node_modules'));
+    dir = path.dirname(dir);
+  }
+  return result;
+}
+
+const paths = getResolvePaths(cwd);
 requires.forEach(mod => {
-  require(mod);
+  require(require.resolve(mod, {paths}));
 });
 
 // interface
