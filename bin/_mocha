@@ -55,29 +55,18 @@ const exitLater = code => {
     process.exit(Math.min(code, 255));
   });
 
-  let timeout = Date.now() + calcLeakTimeout();
-  let timer = setInterval(() => {
-    if (Date.now() > timeout) {
-      clearInterval(timer);
+  const timer = setTimeout(function() {
+    console.error(
+      'Process did not terminate, dumping remaining handles and exiting'
+    );
+    wtfnode.dump();
 
-      console.error(
-        'Process did not terminate, dumping remaining handles and exiting'
-      );
-      wtfnode.dump();
+    process.removeAllListeners('exit');
+    process.exit(-1);
+  }, calcLeakTimeout());
 
-      process.removeAllListeners('exit');
-      process.exit(-1);
-    } else {
-      let activeHandles = process
-        ._getActiveHandles()
-        .filter(h => typeof h.fd !== 'number' || h.fd > 2); // Filter out stdio handles
-
-      // Allow this timer to be running
-      if (activeHandles.length <= 1) {
-        clearInterval(timer);
-      }
-    }
-  }, 10);
+  // This timer should not prevent the process from exiting
+  timer.unref();
 };
 
 /**
