@@ -473,7 +473,7 @@
     "minimatch": "3.0.4",
     "mkdirp": "0.5.1",
     "supports-color": "5.4.0",
-    "wtfnode": "^0.8.4"
+    "wtfnode": "0.8.0"
   },
   "devDependencies": {
     "@mocha/docdash": "^1.0.1",

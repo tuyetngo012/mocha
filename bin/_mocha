@@ -59,7 +59,7 @@ const exitLater = code => {
     console.error(
       'Process did not terminate, dumping remaining handles and exiting'
     );
-    wtfnode.dump();
+    // wtfnode.dump();
 
     process.removeAllListeners('exit');
     process.exit(-1);
